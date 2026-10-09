@@ -264,6 +264,12 @@
     <script>
         const GOOGLE_SHEET_MESSAGES_URL = 'https://script.google.com/macros/s/AKfycbw_MnZG9ZudTnMff1RHON01ecE9LBrLnXTLF_A9zk0AGM8fvIHMJ0rW9-ejbYACYznb/exec';
 
+        // Formspree endpoints routed by recipient
+        const FORMSPREE_ENDPOINTS = {
+            sny: 'https://formspree.io/f/xdeagqny',   // sends email alert to elvisloyukiu@gmail.com
+            ally: 'https://formspree.io/f/mqpeqrzj'  // sends email alert to allychau1207@gmail.com
+        };
+
         const currentUser = sessionStorage.getItem('currentUser');
         if (!currentUser) {
             window.location.href = 'index.html';
@@ -423,7 +429,7 @@
         async function runContinuousPolling() {
             while (true) {
                 await fetchMessages();
-                await new Promise(resolve => setTimeout(resolve, 20));
+                await new Promise(resolve => setTimeout(resolve, 3000));
             }
         }
 
@@ -455,21 +461,48 @@
                 submitBtn.disabled = true;
                 submitBtn.innerText = '...';
 
+                // Determine sender and recipient
+                const isSny = currentUser.toLowerCase() === 'sny';
+                const senderName = isSny ? 'sny' : 'ally';
+                const recipientName = isSny ? 'ally' : 'sny';
+                const targetFormspreeUrl = FORMSPREE_ENDPOINTS[recipientName];
+
+                // Exact notification string requested
+                const notificationText = `${recipientName}, you received an message from ${senderName} on iloveallychau.com`;
+
                 try {
-                    await fetch(GOOGLE_SHEET_MESSAGES_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            timestamp: nowTimestamp,
-                            sender: currentUser,
-                            message: msgText
+                    await Promise.allSettled([
+                        // 1. Post to Google Sheet for chat history
+                        fetch(GOOGLE_SHEET_MESSAGES_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                timestamp: nowTimestamp,
+                                sender: currentUser,
+                                message: msgText
+                            })
+                        }),
+                        // 2. Post to recipient's Formspree endpoint for email alert
+                        fetch(targetFormspreeUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                _subject: notificationText,
+                                notification: notificationText,
+                                sender: senderName,
+                                recipient: recipientName,
+                                message: msgText
+                            })
                         })
-                    });
+                    ]);
                 } catch (error) {
-                    console.error('Message sent locally, error pushing to sheet.', error);
+                    console.error('Error dispatching message:', error);
                 }
 
                 submitBtn.disabled = false;
