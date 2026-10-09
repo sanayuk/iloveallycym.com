@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Messages</title>
+    <style>
+        body, input, button, p, h1, h2, div, span {
+            font-family: 'Helvetica', Arial, sans-serif;
+        }
+
+        body { 
+            margin: 0; 
+            min-height: 100vh; 
+            background: linear-gradient(135deg, #ffffff 0%, #ffd1dc 100%); 
+            background-attachment: fixed; 
+            overflow-x: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 5vh 20px 8vh 20px;
+            box-sizing: border-box;
+        }
+
+        .messaging-wrapper {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Top Header Card */
+        .top-bar {
+            background-color: white;
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 8px 25px rgba(255, 182, 193, 0.45);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffb6c1;
+            box-shadow: 0 3px 8px rgba(255, 182, 193, 0.4);
+        }
+
+        .user-profile span {
+            font-size: 17px;
+            font-weight: bold;
+            color: #ff6b8b;
+        }
+
+        .back-btn {
+            background-color: transparent;
+            border: 1.5px solid #ffb6c1;
+            color: #ff6b8b;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #ffe3e8;
+            color: #ff4770;
+            border-color: #ff85a1;
+        }
+
+        /* Messaging Card */
+        .messaging-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 8px 25px rgba(255, 182, 193, 0.5);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            box-sizing: border-box;
+        }
+
+        .messaging-card h2 {
+            margin: 0 0 15px 0;
+            color: #ff6b8b;
+            font-size: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ffe3e8;
+            padding-bottom: 12px;
+        }
+
+        .messages-display {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 10px 5px;
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            text-align: center;
+            color: #ff85a1;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .message-bubble {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.15s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .sender-name {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .message-time {
+            font-size: 10px;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .message-text {
+            word-break: break-word;
+        }
+
+        /* LOGGED-IN USER: Placed on the RIGHT (Pink Bubble) */
+        .message-bubble.msg-right {
+            align-self: flex-end;
+            background-color: #ff9eb5;
+            color: white;
+            border: none;
+            border-bottom-right-radius: 2px;
+            border-bottom-left-radius: 14px;
+        }
+
+        .message-bubble.msg-right .sender-name {
+            color: #ffffff;
+        }
+
+        .message-bubble.msg-right .message-time {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* OTHER USER: Placed on the LEFT (White Bubble) */
+        .message-bubble.msg-left {
+            align-self: flex-start;
+            background-color: #ffffff;
+            color: #444;
+            border: 1px solid #ffd1dc;
+            border-bottom-left-radius: 2px;
+            border-bottom-right-radius: 14px;
+        }
+
+        .message-bubble.msg-left .sender-name {
+            color: #ff6b8b;
+        }
+
+        .message-bubble.msg-left .message-time {
+            color: #888;
+        }
+
+        /* Input Bar */
+        .chat-input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-row input[type="text"] {
+            flex-grow: 1;
+            font-size: 16px;
+            padding: 12px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #fafafa;
+            color: #333;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input-row input[type="text"]:focus {
+            border-color: #ffb6c1;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(255, 182, 193, 0.5);
+        }
+
+        .chat-send-btn {
+            background-color: #ff9eb5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .chat-send-btn:hover { background-color: #ff85a1; }
+        .chat-send-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="messaging-wrapper">
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="user-profile">
+                <img id="user-avatar" src="" alt="avatar">
+                <span id="user-name"></span>
+            </div>
+            <a href="index.html" class="back-btn">← Back to Home</a>
+        </div>
+
+        <!-- MESSAGING CARD -->
+        <div class="messaging-card">
+            <h2 id="chat-title">Our Messages</h2>
+            <div class="messages-display" id="messages-container">
+                <div class="status-indicator" id="status-msg">Loading messages... 💕</div>
+            </div>
+            
+            <form id="messagingForm" class="chat-input-row">
+                <input type="text" id="chatMessage" placeholder="Type a message..." required autocomplete="off">
+                <button type="submit" class="chat-send-btn" id="chat-submit-btn">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEET_MESSAGES_URL = 'https://script.google.com/macros/s/AKfycbw_MnZG9ZudTnMff1RHON01ecE9LBrLnXTLF_A9zk0AGM8fvIHMJ0rW9-ejbYACYznb/exec';
+
+        const currentUser = sessionStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const chatTitle = document.getElementById('chat-title');
+        const msgsContainer = document.getElementById('messages-container');
+
+        if (currentUser.toLowerCase() === 'sny') {
+            userAvatar.src = 'snypfp.jpg';
+            userAvatar.alt = 'sny';
+            userName.textContent = 'sny';
+            chatTitle.textContent = 'mommyy';
+        } else {
+            userAvatar.src = 'allypfp.jpg';
+            userAvatar.alt = 'ally';
+            userName.textContent = 'ally';
+            chatTitle.textContent = 'Good boyyy';
+        }
+
+        const pendingOutbox = [];
+        let lastServerCount = 0;
+        let isFirstLoad = true;
+
+        function formatDisplayTimestamp(raw) {
+            if (!raw) return '';
+            const d = new Date(raw);
+            if (!isNaN(d.getTime())) {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mm = String(d.getMinutes()).padStart(2, '0');
+                return `${y}/${m}/${day} ${hh}:${mm}`;
+            }
+            return String(raw);
+        }
+
+        function getFormattedTimestamp() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+        }
+
+        function appendMessageBubble(sender, text, timestamp, insertBeforeElement = null) {
+            const isMe = (sender || '').toLowerCase() === currentUser.toLowerCase();
+
+            const bubble = document.createElement('div');
+            // Logged-in user -> RIGHT (pink); Other user -> LEFT (white)
+            bubble.className = `message-bubble ${isMe ? 'msg-right' : 'msg-left'}`;
+
+            const header = document.createElement('div');
+            header.className = 'message-header';
+
+            const senderSpan = document.createElement('span');
+            senderSpan.className = 'sender-name';
+            senderSpan.textContent = sender || 'unknown';
+            header.appendChild(senderSpan);
+
+            if (timestamp) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = formatDisplayTimestamp(timestamp);
+                header.appendChild(timeSpan);
+            }
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = text;
+
+            bubble.appendChild(header);
+            bubble.appendChild(textDiv);
+
+            if (insertBeforeElement) {
+                msgsContainer.insertBefore(bubble, insertBeforeElement);
+            } else {
+                msgsContainer.appendChild(bubble);
+            }
+
+            return bubble;
+        }
+
+        async function fetchMessages() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_MESSAGES_URL);
+                const data = await response.json();
+
+                if (data.status === 'success' && Array.isArray(data.messages)) {
+                    const statusMsg = document.getElementById('status-msg');
+                    if (statusMsg) statusMsg.remove();
+
+                    const serverMsgs = data.messages;
+
+                    if (serverMsgs.length < lastServerCount) {
+                        msgsContainer.innerHTML = '';
+                        lastServerCount = 0;
+                    }
+
+                    if (serverMsgs.length === 0 && lastServerCount === 0 && pendingOutbox.length === 0) {
+                        if (!msgsContainer.querySelector('.status-indicator')) {
+                            msgsContainer.innerHTML = '<div class="status-indicator">No messages yet. Say hi! 💕</div>';
+                        }
+                        return;
+                    }
+
+                    let hasNew = false;
+
+                    for (let i = lastServerCount; i < serverMsgs.length; i++) {
+                        const item = serverMsgs[i];
+                        if (!item || !item.message) continue;
+
+                        const emptyNotice = msgsContainer.querySelector('.status-indicator');
+                        if (emptyNotice) emptyNotice.remove();
+
+                        const matchIndex = pendingOutbox.findIndex(
+                            p => p.sender.toLowerCase() === (item.sender || '').toLowerCase() && p.text === item.message
+                        );
+
+                        if (matchIndex !== -1) {
+                            const matched = pendingOutbox[matchIndex];
+                            pendingOutbox.splice(matchIndex, 1);
+
+                            const timeSpan = matched.element.querySelector('.message-time');
+                            if (timeSpan && item.timestamp) {
+                                timeSpan.textContent = formatDisplayTimestamp(item.timestamp);
+                            }
+                        } else {
+                            const firstPending = pendingOutbox.length > 0 ? pendingOutbox[0].element : null;
+                            appendMessageBubble(item.sender, item.message, item.timestamp, firstPending);
+                            hasNew = true;
+                        }
+                    }
+
+                    lastServerCount = serverMsgs.length;
+
+                    if (hasNew || isFirstLoad) {
+                        msgsContainer.scrollTop = msgsContainer.scrollHeight;
+                        isFirstLoad = false;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching messages:', err);
+                if (isFirstLoad) {
+                    const statusMsg = document.getElementById('status-msg');
+                    if (statusMsg) statusMsg.textContent = 'Could not load messages from server.';
+                }
+            }
+        }
+
+        async function runContinuousPolling() {
+            while (true) {
+                await fetchMessages();
+                await new Promise(resolve => setTimeout(resolve, 20));
+            }
+        }
+
+        runContinuousPolling();
+
+        document.getElementById('messagingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const msgInput = document.getElementById('chatMessage');
+            const msgText = msgInput.value.trim();
+            const submitBtn = document.getElementById('chat-submit-btn');
+
+            if (msgText) {
+                const emptyNotice = msgsContainer.querySelector('.status-indicator');
+                if (emptyNotice) emptyNotice.remove();
+
+                const nowTimestamp = getFormattedTimestamp();
+
+                // Append optimistic bubble immediately on the right (pink)
+                const bubbleEl = appendMessageBubble(currentUser, msgText, nowTimestamp);
+                msgsContainer.scrollTop = msgsContainer.scrollHeight; 
+
+                pendingOutbox.push({
+                    sender: currentUser,
+                    text: msgText,
+                    element: bubbleEl
+                });
+
+                msgInput.value = '';
+                submitBtn.disabled = true;
+                submitBtn.innerText = '...';
+
+                try {
+                    await fetch(GOOGLE_SHEET_MESSAGES_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            timestamp: nowTimestamp,
+                            sender: currentUser,
+                            message: msgText
+                        })
+                    });
+                } catch (error) {
+                    console.error('Message sent locally, error pushing to sheet.', error);
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Send';
+            }
+        });
+    </script>
+</body>
+</html>
